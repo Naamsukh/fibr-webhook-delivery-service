@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      - ADMIN_KEY=${ADMIN_KEY:-dev-admin-key}
+      - DB_PATH=/app/data/webhooks.db
+      - MAX_ATTEMPTS=${MAX_ATTEMPTS:-8}
+      - MAX_CONCURRENT=${MAX_CONCURRENT:-10}
+      - POLL_INTERVAL_MS=${POLL_INTERVAL_MS:-2000}
+      - DELIVERY_TIMEOUT_MS=${DELIVERY_TIMEOUT_MS:-10000}
+      - IN_FLIGHT_TIMEOUT_S=${IN_FLIGHT_TIMEOUT_S:-30}
+    volumes:
+      - webhook_data:/app/data
+
+volumes:
+  webhook_data:

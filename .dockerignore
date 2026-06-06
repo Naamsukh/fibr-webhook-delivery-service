@@ -1,0 +1,14 @@
+node_modules/
+dist/
+data/
+.env
+*.tsbuildinfo
+*.log
+.DS_Store
+.git/
+.gitignore
+.dockerignore
+test/
+AI_LOG.md
+DECISIONS.md
+README.md
