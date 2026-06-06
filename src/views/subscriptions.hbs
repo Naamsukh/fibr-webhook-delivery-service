@@ -1,0 +1,58 @@
+<h1>Subscriptions</h1>
+
+<details class="create-form">
+  <summary>+ Create Subscription</summary>
+  <form method="POST" action="/dashboard/subscriptions">
+    <label>
+      Target URL *
+      <input type="url" name="target_url" required placeholder="https://example.com/webhook">
+    </label>
+    <label>
+      Secret (optional)
+      <input type="text" name="secret" placeholder="leave blank for no signing">
+    </label>
+    <label>
+      Event Types (comma-separated, * for all)
+      <input type="text" name="event_types" placeholder="order.created, user.*" value="*">
+    </label>
+    {{#if error}}
+    <p class="error">{{error}}</p>
+    {{/if}}
+    <button type="submit">Create</button>
+  </form>
+</details>
+
+{{#if subscriptions.length}}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Target URL</th>
+      <th>Event Types</th>
+      <th>Status</th>
+      <th>Created</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each subscriptions}}
+    <tr>
+      <td><a href="/dashboard/subscriptions/{{id}}">{{short_id}}</a></td>
+      <td class="url-cell">{{target_url}}</td>
+      <td><code>{{event_types_str}}</code></td>
+      <td><span class="badge {{#if active}}badge-success{{else}}badge-exhausted{{/if}}">{{#if active}}active{{else}}inactive{{/if}}</span></td>
+      <td>{{created_at_fmt}}</td>
+      <td>
+        {{#if active}}
+        <form method="POST" action="/dashboard/subscriptions/{{id}}/delete" style="display:inline">
+          <button type="submit" class="btn-danger btn-sm" onclick="return confirm('Deactivate this subscription?')">Deactivate</button>
+        </form>
+        {{/if}}
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">No subscriptions yet.</p>
+{{/if}}

@@ -1,0 +1,50 @@
+<a href="/dashboard/events">← Back to Events</a>
+
+<h1>Event <code>{{event.short_id}}</code></h1>
+
+<table class="detail-table">
+  <tr><th>ID</th><td>{{event.id}}</td></tr>
+  <tr><th>Type</th><td><code>{{event.event_type}}</code></td></tr>
+  <tr><th>Ingested At</th><td>{{event.ingested_at_fmt}}</td></tr>
+</table>
+
+<h2>Payload</h2>
+<pre class="payload">{{event.payload_json}}</pre>
+
+<h2>Delivery Attempts ({{attempts.length}})</h2>
+{{#if attempts.length}}
+<table>
+  <thead>
+    <tr>
+      <th>Subscription</th>
+      <th>Status</th>
+      <th>Attempt</th>
+      <th>HTTP</th>
+      <th>Error</th>
+      <th>Next / Updated</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each attempts}}
+    <tr>
+      <td><a href="/dashboard/subscriptions/{{subscription_id}}">{{subscription_id}}</a></td>
+      <td><span class="badge {{status_class}}">{{status}}</span></td>
+      <td>{{attempt_number}}/{{max_attempts}}</td>
+      <td>{{last_http_status}}</td>
+      <td class="error-cell">{{last_error_short}}</td>
+      <td>{{#if next_attempt_at_fmt}}{{next_attempt_at_fmt}}{{else}}{{updated_at_fmt}}{{/if}}</td>
+      <td>
+        {{#if canRetry}}
+        <form method="POST" action="/dashboard/delivery-attempts/{{id}}/retry">
+          <button type="submit" class="btn-retry btn-sm">Retry</button>
+        </form>
+        {{/if}}
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">No delivery attempts for this event.</p>
+{{/if}}

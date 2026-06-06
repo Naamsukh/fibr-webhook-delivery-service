@@ -1,0 +1,44 @@
+<h1>Overview</h1>
+
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-value">{{active_subscriptions}}</div>
+    <div class="stat-label">Active Subscriptions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{events_last_24h}}</div>
+    <div class="stat-label">Events (last 24h)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{pending_deliveries}}</div>
+    <div class="stat-label">Pending Deliveries</div>
+  </div>
+  <div class="stat-card stat-card--warn">
+    <div class="stat-value">{{exhausted_deliveries}}</div>
+    <div class="stat-label">Exhausted Deliveries</div>
+  </div>
+</div>
+
+<h2>Recent Events</h2>
+{{#if recent_events.length}}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Type</th>
+      <th>Ingested At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each recent_events}}
+    <tr>
+      <td><a href="/dashboard/events/{{id}}">{{short_id}}</a></td>
+      <td><code>{{event_type}}</code></td>
+      <td>{{ingested_at_fmt}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">No events yet. Use <code>POST /api/events</code> to ingest one.</p>
+{{/if}}

@@ -1,0 +1,38 @@
+<h1>Events</h1>
+
+<form method="GET" action="/dashboard/events" class="filter-form">
+  <input type="text" name="event_type" placeholder="Filter by type (e.g. order.*)" value="{{event_type_filter}}">
+  <button type="submit">Filter</button>
+  {{#if event_type_filter}}<a href="/dashboard/events">Clear</a>{{/if}}
+</form>
+
+<p>{{total}} events total</p>
+
+{{#if events.length}}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Type</th>
+      <th>Ingested At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each events}}
+    <tr>
+      <td><a href="/dashboard/events/{{id}}">{{short_id}}</a></td>
+      <td><code>{{event_type}}</code></td>
+      <td>{{ingested_at_fmt}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<div class="pagination">
+  {{#if prev_page}}<a href="/dashboard/events?page={{prev_page}}{{#if event_type_filter}}&event_type={{event_type_filter}}{{/if}}">← Prev</a>{{/if}}
+  <span>Page {{page}} of {{total_pages}}</span>
+  {{#if next_page}}<a href="/dashboard/events?page={{next_page}}{{#if event_type_filter}}&event_type={{event_type_filter}}{{/if}}">Next →</a>{{/if}}
+</div>
+{{else}}
+<p class="empty">No events found.</p>
+{{/if}}

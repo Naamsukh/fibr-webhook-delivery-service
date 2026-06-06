@@ -1,0 +1,43 @@
+<a href="/dashboard/subscriptions">← Back to Subscriptions</a>
+
+<h1>Subscription <code>{{subscription.short_id}}</code></h1>
+
+<table class="detail-table">
+  <tr><th>ID</th><td>{{subscription.id}}</td></tr>
+  <tr><th>Target URL</th><td>{{subscription.target_url}}</td></tr>
+  <tr><th>Event Types</th><td><code>{{subscription.event_types_str}}</code></td></tr>
+  <tr><th>Secret</th><td>{{#if subscription.secret}}configured (hidden){{else}}none{{/if}}</td></tr>
+  <tr><th>Status</th><td><span class="badge {{#if subscription.active}}badge-success{{else}}badge-exhausted{{/if}}">{{#if subscription.active}}active{{else}}inactive{{/if}}</span></td></tr>
+  <tr><th>Created</th><td>{{subscription.created_at_fmt}}</td></tr>
+  <tr><th>Updated</th><td>{{subscription.updated_at_fmt}}</td></tr>
+</table>
+
+<h2>Recent Delivery Attempts ({{total}})</h2>
+{{#if attempts.length}}
+<table>
+  <thead>
+    <tr>
+      <th>Event</th>
+      <th>Status</th>
+      <th>Attempt</th>
+      <th>HTTP</th>
+      <th>Error</th>
+      <th>Next / Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each attempts}}
+    <tr>
+      <td><a href="/dashboard/events/{{event_id}}">{{short_event_id}}</a></td>
+      <td><span class="badge {{status_class}}">{{status}}</span></td>
+      <td>{{attempt_number}}/{{max_attempts}}</td>
+      <td>{{last_http_status}}</td>
+      <td>{{last_error_short}}</td>
+      <td>{{#if next_attempt_at_fmt}}{{next_attempt_at_fmt}}{{else}}{{updated_at_fmt}}{{/if}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">No delivery attempts yet.</p>
+{{/if}}
