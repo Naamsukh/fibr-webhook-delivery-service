@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
-COPY src/views ./src/views
+COPY src/views ./dist/views
 COPY public ./public
 RUN mkdir -p data
 EXPOSE 3000
