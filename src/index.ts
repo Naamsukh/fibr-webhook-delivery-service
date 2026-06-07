@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import fastifyView from "@fastify/view";
 import fastifyStatic from "@fastify/static";
+import fastifyFormbody from "@fastify/formbody";
 import Handlebars from "handlebars";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -15,6 +16,9 @@ export async function buildApp() {
 
   // Ensure DB is open and schema applied
   getDb();
+
+  // Parse application/x-www-form-urlencoded (HTML form submissions)
+  await app.register(fastifyFormbody);
 
   // Static files (CSS, JS for dashboard)
   await app.register(fastifyStatic, {
