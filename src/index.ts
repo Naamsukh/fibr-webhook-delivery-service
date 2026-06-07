@@ -50,6 +50,10 @@ export async function buildApp() {
     return reply.redirect("/dashboard");
   });
 
+  // Debug echo endpoint (no auth — receives test webhook deliveries)
+  const { debugRoutes } = await import("./routes/debug.js");
+  await app.register(debugRoutes, { prefix: "/debug" });
+
   // API routes (auth enforced inside authPlugin scope)
   const { authPlugin } = await import("./plugins/auth.js");
   const { subscriptionRoutes } = await import("./routes/api/subscriptions.js");
@@ -75,6 +79,10 @@ export async function buildApp() {
 
 async function main() {
   const app = await buildApp();
+
+  // Seed test subscription on first run
+  const { seedIfEmpty } = await import("./seed.js");
+  seedIfEmpty(getDb());
 
   // Start delivery worker
   const { startWorker } = await import("./worker/poller.js");

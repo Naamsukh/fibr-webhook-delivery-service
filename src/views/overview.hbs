@@ -19,6 +19,24 @@
   </div>
 </div>
 
+<div class="test-panel">
+  <h2>Send Test Event</h2>
+  <p class="test-panel__hint">Fires an event and fans it out to all matching subscriptions. <a href="/dashboard/echo">View echo log →</a></p>
+  <form method="POST" action="/dashboard/send-test-event" class="test-form">
+    <div class="test-form__row">
+      <label>
+        Event Type
+        <input type="text" name="event_type" value="test.event" placeholder="order.created">
+      </label>
+      <label class="test-form__payload">
+        Payload (JSON)
+        <textarea name="payload" rows="3">{"hello": "world"}</textarea>
+      </label>
+      <button type="submit" class="btn-send">Send →</button>
+    </div>
+  </form>
+</div>
+
 <h2>Recent Events</h2>
 {{#if recent_events.length}}
 <table>
@@ -40,5 +58,5 @@
   </tbody>
 </table>
 {{else}}
-<p class="empty">No events yet. Use <code>POST /api/events</code> to ingest one.</p>
+<p class="empty">No events yet — send one above.</p>
 {{/if}}

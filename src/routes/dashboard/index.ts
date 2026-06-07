@@ -1,8 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { getDb } from "../../db/client.js";
 import { listSubscriptions, getSubscriptionById, createSubscription, softDeleteSubscription, CreateSubscriptionSchema } from "../../services/subscriptionService.js";
-import { listEvents, getEventById } from "../../services/eventService.js";
+import { listEvents, getEventById, ingestEvent } from "../../services/eventService.js";
 import { listDeliveryAttempts, getDeliveryAttemptsByEventId, getDeliveryAttemptById, resetForRetry, isRetryConflict } from "../../services/deliveryService.js";
+import { getEchoLog } from "../debug.js";
 import { formatTs, statusBadgeClass, truncate, shortId } from "./helpers.js";
 
 function enrich(obj: Record<string, unknown>): Record<string, unknown> {
@@ -11,6 +12,7 @@ function enrich(obj: Record<string, unknown>): Record<string, unknown> {
   if (typeof obj.updated_at === "number") out.updated_at_fmt = formatTs(obj.updated_at as number);
   if (typeof obj.ingested_at === "number") out.ingested_at_fmt = formatTs(obj.ingested_at as number);
   if (typeof obj.next_attempt_at === "number") out.next_attempt_at_fmt = formatTs(obj.next_attempt_at as number);
+  if (typeof obj.received_at === "number") out.received_at_fmt = formatTs(obj.received_at as number);
   if (typeof obj.status === "string") out.status_class = statusBadgeClass(obj.status as string);
   if (typeof obj.last_error === "string") out.last_error_short = truncate(obj.last_error as string);
   if (typeof obj.id === "string") out.short_id = shortId(obj.id as string);
@@ -22,7 +24,7 @@ function enrich(obj: Record<string, unknown>): Record<string, unknown> {
 export async function dashboardRoutes(app: FastifyInstance) {
   const db = getDb();
 
-  // Overview
+  // Overview + Send Test Event form
   app.get("/", async (_req, reply) => {
     const subscriptions = listSubscriptions(db);
     const events = listEvents(db, { limit: 10 });
@@ -40,6 +42,34 @@ export async function dashboardRoutes(app: FastifyInstance) {
       exhausted_deliveries: exhaustedCount,
       recent_events: events.data.map((e) => enrich(e as unknown as Record<string, unknown>)),
     });
+  });
+
+  // Send Test Event (form submit from overview)
+  app.post("/send-test-event", async (request, reply) => {
+    const body = request.body as Record<string, string>;
+    const eventType = (body.event_type || "test.event").trim();
+    let payload: Record<string, unknown> = { hello: "world", timestamp: Date.now() };
+    try {
+      if (body.payload) payload = JSON.parse(body.payload) as Record<string, unknown>;
+    } catch { /* use default */ }
+
+    const result = ingestEvent(db, { event_type: eventType, payload });
+    return reply.redirect(`/dashboard/events/${result.eventId}`);
+  });
+
+  // Echo log (webhooks received at /debug/echo)
+  app.get("/echo", async (_req, reply) => {
+    const log = getEchoLog().map((e) => ({
+      ...enrich(e as unknown as Record<string, unknown>),
+      body_json: JSON.stringify(e.body, null, 2),
+      sig_class: e.signature_valid === true ? "badge-success"
+                : e.signature_valid === false ? "badge-exhausted"
+                : "badge-unknown",
+      sig_label: e.signature_valid === true ? "valid timestamp"
+               : e.signature_valid === false ? "stale/bad timestamp"
+               : "unsigned",
+    }));
+    return reply.view("echo.hbs", { entries: log, total: log.length });
   });
 
   // Subscriptions list + create form

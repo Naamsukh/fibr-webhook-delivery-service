@@ -1,0 +1,30 @@
+<div class="echo-header">
+  <h1>Echo Log</h1>
+  <a href="/dashboard/echo" class="btn-refresh">↻ Refresh</a>
+</div>
+<p>Webhooks received at <code>POST /debug/echo</code> — the built-in test subscriber. Shows the last 50 deliveries.</p>
+
+{{#if entries.length}}
+<div class="echo-list">
+  {{#each entries}}
+  <div class="echo-card">
+    <div class="echo-card__header">
+      <span>{{received_at_fmt}}</span>
+      <span class="badge {{sig_class}}">{{sig_label}}</span>
+      {{#if headers.x-webhook-id}}<code class="echo-id">{{headers.x-webhook-id}}</code>{{/if}}
+    </div>
+    <div class="echo-card__meta">
+      {{#if headers.x-webhook-signature}}
+      <span class="meta-item"><strong>Signature:</strong> <code>{{headers.x-webhook-signature}}</code></span>
+      {{/if}}
+      {{#if headers.x-webhook-timestamp}}
+      <span class="meta-item"><strong>Timestamp:</strong> <code>{{headers.x-webhook-timestamp}}</code></span>
+      {{/if}}
+    </div>
+    <pre class="payload">{{body_json}}</pre>
+  </div>
+  {{/each}}
+</div>
+{{else}}
+<p class="empty">No webhooks received yet. <a href="/dashboard">Send a test event →</a></p>
+{{/if}}

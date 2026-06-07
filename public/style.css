@@ -134,3 +134,34 @@ form button[type=submit] { background: #2563eb; color: #fff; margin-top: 0.5rem;
 
 .empty { color: #9ca3af; font-style: italic; margin: 1rem 0; }
 .error { color: #dc2626; font-size: 12px; }
+
+/* Test panel */
+.test-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  border-left: 4px solid #7c3aed;
+}
+.test-panel h2 { margin: 0 0 4px; color: #1a1a1a; font-size: 1rem; }
+.test-panel__hint { color: #6b7280; font-size: 12px; margin-bottom: 1rem; }
+.test-form__row { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+.test-form__row label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500; }
+.test-form__row input[type=text] { border: 1px solid #d1d5db; border-radius: 4px; padding: 6px 10px; font-size: 13px; width: 200px; }
+.test-form__payload { flex: 1; min-width: 260px; }
+.test-form__payload textarea { border: 1px solid #d1d5db; border-radius: 4px; padding: 6px 10px; font-size: 12px; font-family: monospace; width: 100%; resize: vertical; }
+.btn-send { background: #7c3aed; color: #fff; border: none; border-radius: 4px; padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: flex-end; }
+.btn-send:hover { opacity: .88; }
+
+/* Echo log */
+.echo-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+.echo-header h1 { margin: 0; }
+.btn-refresh { background: #374151; color: #fff; border-radius: 4px; padding: 5px 12px; font-size: 12px; text-decoration: none; }
+.echo-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+.echo-card { background: #fff; border-radius: 6px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.echo-card__header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 13px; color: #555; flex-wrap: wrap; }
+.echo-id { font-size: 11px; color: #888; }
+.echo-card__meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.5rem; font-size: 12px; }
+.echo-card__meta code { font-size: 11px; word-break: break-all; }
+.meta-item { display: flex; gap: 4px; align-items: baseline; }
