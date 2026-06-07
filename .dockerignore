@@ -8,7 +8,6 @@ data/
 .git/
 .gitignore
 .dockerignore
-test/
 AI_LOG.md
 DECISIONS.md
 README.md

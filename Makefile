@@ -1,5 +1,5 @@
 .PHONY: install dev build start test test-watch clean \
-        docker-build docker-up docker-down docker-logs docker-shell docker-clean
+        docker-build docker-up docker-down docker-logs docker-shell docker-clean docker-test
 
 IMAGE ?= fibr-webhook-delivery-service
 
@@ -42,6 +42,9 @@ docker-logs:
 
 docker-shell:
 	docker compose exec app sh
+
+docker-test:
+	docker build --target tester -t $(IMAGE)-test .
 
 docker-clean:
 	docker compose down -v --rmi local
