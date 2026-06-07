@@ -1,6 +1,6 @@
 # AI Interaction Log
 
-Five meaningful interactions documenting where AI assistance shaped the implementation.
+Six meaningful interactions documenting where AI assistance shaped the implementation.
 
 ---
 
@@ -61,3 +61,15 @@ Five meaningful interactions documenting where AI assistance shaped the implemen
 **What I kept**: The `__dirname` via `fileURLToPath` pattern — this is the standard ESM solution and I'd have used it anyway, but the explanation of why it diverges between `src/` and `dist/` was useful for sanity-checking the path construction.
 
 **What I modified**: The suggested config included `layoutsDir` and `partialsDir` options that I didn't need given my simple template structure. I stripped those to keep the plugin registration minimal.
+
+---
+
+## 6. Gap Caught Post-Generation: Form Body Parsing
+
+**What happened**: All dashboard forms (create subscription, send test event, retry) returned `415 Unsupported Media Type` when submitted. The AI-generated Fastify setup didn't include `@fastify/formbody`, which is required to parse `application/x-www-form-urlencoded` — the default encoding for HTML form POSTs. Fastify only parses `application/json` out of the box.
+
+**What I asked**: Nothing — I diagnosed this myself from the 415 error code and Fastify's content-type handling docs. The AI had generated working-looking route handlers that cast `request.body` to the right type, but silently assumed form parsing was already configured.
+
+**What I rejected**: I considered switching the dashboard forms to submit JSON via `fetch()` instead of native HTML forms (which would have avoided the issue entirely). I rejected that because it adds JavaScript as a hard dependency for core CRUD flows, breaks without JS enabled, and the whole point of server-rendered Handlebars was to stay simple. The right fix was to add the plugin, not change the architecture.
+
+**Lesson**: AI-generated Fastify code tends to omit plugin registration for things that feel "standard" but aren't in Fastify's default scope. Worth auditing plugin registrations explicitly rather than assuming they're there.

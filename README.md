@@ -4,20 +4,17 @@ A single-process webhook delivery service: subscribe to events, ingest them, and
 
 ## Quick Start
 
+**Single command (Docker — no Node.js required):**
 ```bash
-# 1. Install dependencies
-npm install
-
-# 2. (Optional) configure via environment variables
-cp .env.example .env
-# Edit .env — defaults work out of the box
-
-# 3. Start the server
-npm run dev       # development (hot-reload via tsx)
-npm start         # production (requires npm run build first)
+docker compose up --build
 ```
 
-The server starts at **http://localhost:3000** (configurable via `PORT`).
+**Or locally:**
+```bash
+npm install && npm run dev
+```
+
+The server starts at **http://localhost:3000**. Open the dashboard at **http://localhost:3000/dashboard** — a test subscription pointing to the built-in echo endpoint is created automatically on first run.
 
 ## Environment Variables
 
