@@ -1,16 +1,25 @@
 import { getDb } from "../db/client.js";
 import { config } from "../config.js";
 import { executeDelivery, type DeliveryAttempt } from "../services/deliveryService.js";
-import { recoverInFlight } from "./recovery.js";
+import { recoverInFlight, reapStaleInFlight } from "./recovery.js";
 
 let activeDeliveries = 0;
 let pollTimer: NodeJS.Timeout | null = null;
+let draining = false;
 
 async function pollOnce(): Promise<void> {
+  if (draining) return;
+
+  const db = getDb();
+
+  // Sweep deliveries stuck in_flight beyond the timeout (e.g. a fast
+  // crash-restart that outran startup recovery, or a hung request) back to
+  // pending before claiming new work.
+  reapStaleInFlight(db);
+
   const available = config.maxConcurrent - activeDeliveries;
   if (available <= 0) return;
 
-  const db = getDb();
   const nowSecs = Math.floor(Date.now() / 1000);
 
   // Claim a batch atomically — SQLite serializes writes, no external lock needed
@@ -49,6 +58,23 @@ export function stopWorker(): void {
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
+  }
+}
+
+// Graceful shutdown: stop polling, then wait for in-flight deliveries to finish
+// up to a deadline. Anything still running when the deadline hits is left as
+// in_flight and recovered on next startup (at-least-once still holds).
+export async function shutdownWorker(deadlineMs = 15000): Promise<void> {
+  draining = true;
+  stopWorker();
+  const start = Date.now();
+  while (activeDeliveries > 0 && Date.now() - start < deadlineMs) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  if (activeDeliveries > 0) {
+    console.log(`[worker] shutdown deadline hit with ${activeDeliveries} in-flight; will recover on restart`);
+  } else {
+    console.log("[worker] drained cleanly");
   }
 }
 

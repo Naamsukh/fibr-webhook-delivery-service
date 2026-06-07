@@ -6,7 +6,7 @@ import Handlebars from "handlebars";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { config } from "./config.js";
-import { getDb } from "./db/client.js";
+import { getDb, closeDb } from "./db/client.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -89,10 +89,32 @@ async function main() {
   seedIfEmpty(getDb());
 
   // Start delivery worker
-  const { startWorker } = await import("./worker/poller.js");
+  const { startWorker, shutdownWorker } = await import("./worker/poller.js");
   startWorker();
 
   await app.listen({ port: config.port, host: "0.0.0.0" });
+
+  // Graceful shutdown: stop accepting HTTP, drain in-flight deliveries, then
+  // checkpoint and close SQLite. Guarded so a second signal doesn't re-enter.
+  let shuttingDown = false;
+  const shutdown = async (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`\n[shutdown] ${signal} received, draining...`);
+    try {
+      await app.close();
+      await shutdownWorker();
+      closeDb();
+      console.log("[shutdown] clean exit");
+      process.exit(0);
+    } catch (err) {
+      console.error("[shutdown] error during shutdown:", err);
+      process.exit(1);
+    }
+  };
+
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+  process.on("SIGINT", () => void shutdown("SIGINT"));
 }
 
 main().catch((err) => {

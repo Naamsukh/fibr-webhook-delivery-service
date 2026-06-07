@@ -146,18 +146,19 @@ def verify(body: bytes, secret: str, timestamp: str, signature: str) -> bool:
 npm test
 ```
 
-40 tests covering pattern matching, signing, subscription CRUD, event fan-out, delivery state machine, and worker crash recovery.
+41 tests covering pattern matching, signing, subscription CRUD, event fan-out, delivery state machine, startup recovery, and the periodic stale-in-flight reaper.
 
 ## What's Working
 
 - Full subscription CRUD with soft-delete
 - Event ingest with fan-out to matching subscriptions
 - Async delivery worker with exponential backoff + jitter
-- Crash recovery (in-flight → pending on startup)
+- Crash recovery: startup resets all orphaned in-flight rows; a periodic reaper sweeps any stuck mid-run
+- Graceful shutdown (SIGINT/SIGTERM): stop accepting HTTP, drain in-flight deliveries, checkpoint + close SQLite
 - Payload signing (HMAC-SHA256) with timestamp-based replay prevention
 - Manual retry from API and dashboard
 - Dashboard with overview, subscriptions, events, event detail
-- 40 passing tests
+- 41 passing tests
 
 ## What I'd Improve with More Time
 
@@ -165,6 +166,5 @@ npm test
 - **Metrics endpoint** — Prometheus-compatible `/metrics` (delivery success rate, p99 latency, queue depth)
 - **Rate limiting on ingest** — prevent event storms from a single caller
 - **Structured delivery logs** — store full response body (truncated) for debugging
-- **Graceful shutdown** — drain in-flight deliveries before process exit
 - **Configurable retry policy per subscription** — currently global
 - **Event replay by subscription** — re-fan-out a historical event to a specific subscriber

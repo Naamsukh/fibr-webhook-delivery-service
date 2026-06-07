@@ -24,7 +24,9 @@ Six interactions where AI meaningfully shaped — or tried to shape — the impl
 
 **What I kept**: The entire mental model. Calling it a "lease" was the click for me — I understood it immediately as the same pattern used in distributed task queues, just without the network layer. The concrete implication (duplicate delivery is possible but rare, subscribers should be idempotent) is documented in DECISIONS.md because I think it's the most important correctness property of the whole system.
 
-**What I changed**: The suggested timeout threshold was 60 seconds. My delivery timeout is 10 seconds, so 60s felt conservative. I tightened it to 30s — still 3x the timeout, still safe, but recovers faster after a crash. Small call, but it's mine.
+**What I changed**: The suggested timeout threshold was 60 seconds. My delivery timeout is 10 seconds, so 60s felt conservative. I tightened it to 30s — still 3x the timeout, recovers faster after a crash.
+
+**What I later caught**: Applying that threshold at *startup* was a bug. At boot no deliveries are running in the new process, so every `in_flight` row is orphaned regardless of age — a row claimed 5s before a crash, with a fast restart, would be younger than the cutoff and stranded in `in_flight` forever (recovery only ran once, at startup). The threshold logic the AI gave me is correct for a *periodic reaper in a running process*, not for boot recovery. I split the two: startup resets all `in_flight` unconditionally; a separate reaper in the poll loop uses the 30s cutoff to catch rows stuck mid-run. Good reminder that a correct mechanism applied in the wrong place is still a bug.
 
 ---
 

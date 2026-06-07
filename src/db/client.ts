@@ -29,6 +29,14 @@ export function getDb(): Database.Database {
   return _db;
 }
 
+// Checkpoint the WAL and close the application DB. Called on graceful shutdown.
+export function closeDb(): void {
+  if (_db) {
+    _db.close();
+    _db = null;
+  }
+}
+
 // For tests — open a fresh in-memory DB
 export function createTestDb(): Database.Database {
   const db = new Database(":memory:");
